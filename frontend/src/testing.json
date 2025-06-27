@@ -1,0 +1,128 @@
+[
+  {
+    "question": "How do you write a constant variable in JavaScript?",
+    "answers": [
+      {
+        "text": "let PI = 3.14;",
+        "correct": false,
+        "reason": "`let` allows reassignment, so it's not a constant."
+      },
+      {
+        "text": "var PI = 3.14;",
+        "correct": false,
+        "reason": "`var` is function-scoped and not constant."
+      },
+      {
+        "text": "const PI = 3.14;",
+        "correct": true,
+        "reason": "`const` declares a variable that cannot be reassigned."
+      },
+      {
+        "text": "#define PI 3.14",
+        "correct": false,
+        "reason": "This is C/C++ syntax, not JavaScript."
+      }
+    ]
+  },
+  {
+    "question": "What does `===` do in JavaScript?",
+    "answers": [
+      {
+        "text": "Assigns a value to a variable",
+        "correct": false,
+        "reason": "Assignment uses `=` not `===`."
+      },
+      {
+        "text": "Compares values after type coercion",
+        "correct": false,
+        "reason": "`==` compares with type coercion; `===` does not."
+      },
+      {
+        "text": "Compares both value and type",
+        "correct": true,
+        "reason": "`===` checks for strict equality."
+      },
+      {
+        "text": "Checks if a variable is undefined",
+        "correct": false,
+        "reason": "`typeof x === 'undefined'` can do that, but `===` itself just compares."
+      }
+    ]
+  },
+  {
+    "question": "Which of the following is a JavaScript data type?",
+    "answers": [
+      {
+        "text": "float",
+        "correct": false,
+        "reason": "JavaScript uses `number` for all numeric values, no `float` type."
+      },
+      {
+        "text": "double",
+        "correct": false,
+        "reason": "`double` is from C/C++, not JavaScript."
+      },
+      {
+        "text": "number",
+        "correct": true,
+        "reason": "`number` is a valid primitive data type in JavaScript."
+      },
+      {
+        "text": "real",
+        "correct": false,
+        "reason": "`real` is not a recognized type in JavaScript."
+      }
+    ]
+  },
+  {
+    "question": "What will `typeof null` return?",
+    "answers": [
+      {
+        "text": "`null`",
+        "correct": false,
+        "reason": "It looks like it should return `null`, but doesn't."
+      },
+      {
+        "text": "`object`",
+        "correct": true,
+        "reason": "This is a well-known quirk in JavaScript."
+      },
+      {
+        "text": "`undefined`",
+        "correct": false,
+        "reason": "`undefined` is for variables with no assigned value, not `null`."
+      },
+      {
+        "text": "`boolean`",
+        "correct": false,
+        "reason": "`null` is not a boolean."
+      }
+    ]
+  },
+  {
+    "question": "What does `Array.isArray([])` return?",
+    "answers": [
+      {
+        "text": "false",
+        "correct": false,
+        "reason": "It's definitely an array, so this is incorrect."
+      },
+      {
+        "text": "null",
+        "correct": false,
+        "reason": "null is not a valid return value for this method."
+      },
+      {
+        "text": "true",
+        "correct": true,
+        "reason": "Correct — it checks if the argument is an array."
+      },
+      {
+        "text": "undefined",
+        "correct": false,
+        "reason": "`undefined` would be returned if no value was returned, not here."
+      }
+    ]
+  }
+]
+

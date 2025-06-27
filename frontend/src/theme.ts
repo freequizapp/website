@@ -31,6 +31,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           color: "#ffffff",
+          "&.Mui-focused": {
+            color: "#ffffff",
+          },
+          width: "100%",
+          textAlign: "left",
         },
       },
     },
