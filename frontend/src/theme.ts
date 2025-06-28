@@ -21,6 +21,9 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           color: "#a388ff",
+          alignSelf: "flex-start", // aligns radio icon with top of multiline text
+          padding: "4px 0", // reduce default padding to help alignment
+
           "&.Mui-checked": {
             color: "#a833ff", // checked
           },
@@ -36,6 +39,14 @@ const theme = createTheme({
           },
           width: "100%",
           textAlign: "left",
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: {
+          textAlign: "left",
+          margin: "5px 0",
         },
       },
     },
