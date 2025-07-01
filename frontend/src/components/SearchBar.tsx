@@ -1,15 +1,16 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import type { Dispatch, SetStateAction } from "react";
+import type { Question } from "../types/question";
 import { TextField, InputAdornment } from "@mui/material";
 import Search from "@mui/icons-material/Search";
-import type { question } from "../types/question";
 
 type Props = {
-  setQuestions: Dispatch<SetStateAction<question[]>>;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
 };
 
-function SearchBar({ setQuestions, setIsLoading }: Props) {
+function SearchBar({ setIsLoading }: Props) {
+  const { setCurrentQuiz } = useAuth();
   const [searchText, setSearchText] = useState<string>("");
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -22,7 +23,7 @@ function SearchBar({ setQuestions, setIsLoading }: Props) {
   const generateSearch = async () => {
     console.log("search text: ", searchText);
 
-    setQuestions([]);
+    setCurrentQuiz([]);
     setIsLoading(true);
 
     const res = await fetch("http://localhost:8080/generate-questions", {
@@ -55,7 +56,7 @@ function SearchBar({ setQuestions, setIsLoading }: Props) {
 
         try {
           const question = JSON.parse(line);
-          setQuestions((prev: question[]) => [...(prev || []), question]);
+          setCurrentQuiz((prev: Question[]) => [...(prev ?? []), question]);
           setIsLoading(false);
         } catch (error) {
           console.error("failed to parse streamed chunk: ", line);

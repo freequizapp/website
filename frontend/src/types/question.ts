@@ -1,4 +1,4 @@
-export type question = {
+export type Question = {
   question: string;
   answers: {
     text: string;

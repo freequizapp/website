@@ -1,16 +1,19 @@
+import { useAuth } from "../context/AuthContext";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
-import type { question } from "../types/question";
+import type { Question } from "../types/Question";
 
 type MultipleChoiceProp = {
-  question: question;
+  question: Question;
   onAnswerSelected: () => void;
 };
 
 function MultipleChoice({ question, onAnswerSelected }: MultipleChoiceProp) {
+  const { setAnswers } = useAuth();
+
   const handleChange = () => {
     onAnswerSelected();
   };
@@ -29,12 +32,20 @@ function MultipleChoice({ question, onAnswerSelected }: MultipleChoiceProp) {
           onChange={handleChange}
         >
           {question &&
-            question.answers.map((answer, index) => (
+            question.answers.map((answer, index: number) => (
               <FormControlLabel
                 control={<Radio />}
                 label={answer.text}
                 value={answer.text}
                 key={index}
+                onClick={() =>
+                  setAnswers((prev) => [
+                    ...prev.filter((entry) => !entry[question.question]),
+                    {
+                      [question.question]: answer.text,
+                    },
+                  ])
+                }
               />
             ))}
         </RadioGroup>

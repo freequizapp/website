@@ -7,7 +7,7 @@ Parameters:
     Description: Groq api key
 Globals:
   Function:
-    Timeout: 30
+    Timeout: 900
     Runtime: go1.x
 Resources:
   GenerateQuestionsFunction:
@@ -16,7 +16,6 @@ Resources:
       Handler: main.go
       CodeUri: GenerateQuestionsFunction
       Runtime: go1.x
-      Timeout: 300
       Environment:
         Variables:
           GROQAPIKEY:

@@ -4,11 +4,17 @@ import "./index.css";
 import theme from "./theme.ts";
 import App from "./App.tsx";
 import { ThemeProvider } from "@emotion/react";
+import { AuthProvider } from "./context/AuthContext.tsx";
+import { BrowserRouter } from "react-router-dom";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
+    </AuthProvider>
   </StrictMode>,
 );
