@@ -13,3 +13,7 @@ curl -X POST http://localhost:8080/generate-questions \
 `
 
 Or use the frontend to prompt.
+
+### For deployment we can use something like this
+`sam deploy --parameter-overrides GROQAPIKEY={github.secrets.groqapikey}`
+
