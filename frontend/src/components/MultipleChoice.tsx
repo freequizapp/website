@@ -7,18 +7,26 @@ import type { question } from "../types/question";
 
 type MultipleChoiceProp = {
   question: question;
+  onAnswerSelected: () => void;
 };
 
-function MultipleChoice({ question }: MultipleChoiceProp) {
+function MultipleChoice({ question, onAnswerSelected }: MultipleChoiceProp) {
+  const handleChange = () => {
+    onAnswerSelected();
+  };
+
   return (
     <div className="my-8 w-full min-w-l flex justify-start items-center">
       <FormControl className="text-white">
-        <FormLabel id="demo-radio-buttons-group-label">
-          {question.question}
-        </FormLabel>
+        <div className="mb-8">
+          <FormLabel id="demo-radio-buttons-group-label">
+            {question.question}
+          </FormLabel>
+        </div>
         <RadioGroup
           aria-labelledby="demo-radio-buttons-group-label"
           name="radio-buttons-group"
+          onChange={handleChange}
         >
           {question &&
             question.answers.map((answer, index) => (

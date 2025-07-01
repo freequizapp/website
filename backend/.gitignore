@@ -137,3 +137,4 @@ infrastructure/terraform.tfstate
 infrastructure/terraform.tfstate.backup
 *.tfstate.*
 *.backup
+env.json

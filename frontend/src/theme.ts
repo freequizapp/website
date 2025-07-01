@@ -22,7 +22,8 @@ const theme = createTheme({
         root: {
           color: "#a388ff",
           alignSelf: "flex-start", // aligns radio icon with top of multiline text
-          padding: "4px 0", // reduce default padding to help alignment
+          padding: "4px", // reduce default padding to help alignment
+          marginRight: "5px",
 
           "&.Mui-checked": {
             color: "#a833ff", // checked

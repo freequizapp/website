@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Quiz AI Lambda
+Parameters:
+  GROQAPIKEY:
+    Type: String
+    Description: Groq api key
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: go1.x
+Resources:
+  GenerateQuestionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.go
+      CodeUri: GenerateQuestionsFunction
+      Runtime: go1.x
+      Timeout: 300
+      Environment:
+        Variables:
+          GROQAPIKEY:
+            Ref: GROQAPIKEY
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            Path: /generate-questions
+            Method: POST
+            ApiId: MyHttpApi
+    Metadata:
+      SamResourceId: GenerateQuestionsFunction
+  MyHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        AllowHeaders:
+        - Content-Type
+        - Authorization
+        AllowOrigins:
+        - http://localhost:5173
