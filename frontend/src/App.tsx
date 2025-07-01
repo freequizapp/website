@@ -7,7 +7,7 @@ import SearchBar from "./components/SearchBar";
 import type { question } from "./types/question";
 
 function App() {
-  const [questions, setQuestions] = useState<question[] | null>(null);
+  const [questions, setQuestions] = useState<question[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [answeredMap, setAnsweredMap] = useState<{ [index: number]: boolean }>(
