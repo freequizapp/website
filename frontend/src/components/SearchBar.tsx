@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { Dispatch, SetStateAction } from "react";
-import type { Question } from "../types/question";
+import type { Question } from "../types/Question";
 import { TextField, InputAdornment } from "@mui/material";
 import Search from "@mui/icons-material/Search";
 
@@ -51,9 +51,7 @@ function SearchBar({ setIsLoading }: Props) {
       while ((newLineIndex = buffer.indexOf("\n")) !== -1) {
         const line = buffer.slice(0, newLineIndex).trim();
         buffer = buffer.slice(newLineIndex + 1);
-
         if (!line) continue;
-
         try {
           const question = JSON.parse(line);
           setCurrentQuiz((prev: Question[]) => [...(prev ?? []), question]);

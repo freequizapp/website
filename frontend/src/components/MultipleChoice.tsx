@@ -8,14 +8,16 @@ import type { Question } from "../types/Question";
 
 type MultipleChoiceProp = {
   question: Question;
-  onAnswerSelected: () => void;
+  onAnswerSelected?: () => void;
 };
 
 function MultipleChoice({ question, onAnswerSelected }: MultipleChoiceProp) {
   const { setAnswers } = useAuth();
 
   const handleChange = () => {
-    onAnswerSelected();
+    if (onAnswerSelected) {
+      onAnswerSelected();
+    }
   };
 
   return (
@@ -29,7 +31,6 @@ function MultipleChoice({ question, onAnswerSelected }: MultipleChoiceProp) {
         <RadioGroup
           aria-labelledby="demo-radio-buttons-group-label"
           name="radio-buttons-group"
-          onChange={handleChange}
         >
           {question &&
             question.answers.map((answer, index: number) => (
@@ -38,14 +39,13 @@ function MultipleChoice({ question, onAnswerSelected }: MultipleChoiceProp) {
                 label={answer.text}
                 value={answer.text}
                 key={index}
-                onClick={() =>
-                  setAnswers((prev) => [
-                    ...prev.filter((entry) => !entry[question.question]),
-                    {
-                      [question.question]: answer.text,
-                    },
-                  ])
-                }
+                onClick={() => {
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [question.question]: answer.text,
+                  }));
+                  handleChange();
+                }}
               />
             ))}
         </RadioGroup>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../App.css";
@@ -13,8 +13,16 @@ export default function Home() {
   const [answeredMap, setAnsweredMap] = useState<{ [index: number]: boolean }>(
     {},
   );
-  const { currentQuiz, answers } = useAuth();
+  const { currentQuiz } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("currentIndex", currentIndex, typeof currentIndex);
+    console.log("currentIndex", currentIndex);
+    console.log("answeredMap", answeredMap);
+    console.log("answeredMap[currentIndex]", answeredMap[currentIndex]);
+    console.log("quiz length: ", currentQuiz.length);
+  }, [currentIndex, answeredMap]);
 
   const handleNext = () => {
     if (currentQuiz && currentIndex < currentQuiz.length - 1) {
@@ -22,12 +30,10 @@ export default function Home() {
     } else if (currentIndex === 4) {
       navigate("/answers");
     }
-    console.log("answered map: ", answeredMap);
   };
 
   const handleAnswerSelected = () => {
     setAnsweredMap((prev) => ({ ...prev, [currentIndex]: true }));
-    console.log("answers", answers);
   };
 
   return (
@@ -48,7 +54,10 @@ export default function Home() {
                 variant="contained"
                 color="secondary"
                 onClick={handleNext}
-                disabled={currentIndex >= currentQuiz.length - 1}
+                disabled={
+                  currentIndex >= currentQuiz.length - 1 ||
+                  !answeredMap[currentIndex]
+                }
                 className="bg-red-500"
               >
                 Next
@@ -58,6 +67,7 @@ export default function Home() {
                 variant="contained"
                 color="secondary"
                 onClick={handleNext}
+                disabled={!answeredMap[currentIndex]}
                 className="bg-red-500"
               >
                 See Results

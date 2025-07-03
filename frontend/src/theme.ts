@@ -9,6 +9,9 @@ const theme = createTheme({
     secondary: {
       main: "#a833ff", // Tailwind rose-500
     },
+    error: {
+      main: "#FF0000",
+    },
     text: {
       primary: "#ffffff",
     },
@@ -17,6 +20,13 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          transition: "none",
+        },
+      },
+    },
     MuiRadio: {
       styleOverrides: {
         root: {
@@ -24,7 +34,6 @@ const theme = createTheme({
           alignSelf: "flex-start", // aligns radio icon with top of multiline text
           padding: "4px", // reduce default padding to help alignment
           marginRight: "5px",
-
           "&.Mui-checked": {
             color: "#a833ff", // checked
           },
