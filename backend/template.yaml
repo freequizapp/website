@@ -8,34 +8,18 @@ Parameters:
 Globals:
   Function:
     Timeout: 900
-    Runtime: go1.x
+    Runtime: provided.al2
 Resources:
   GenerateQuestionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.go
+      FunctionName: freequizapp-generate
+      Handler: bootstrap
       CodeUri: .
-      Runtime: go1.x
+      Runtime: provided.al2
       Environment:
         Variables:
           GROQAPIKEY: !Ref GROQAPIKEY
-      Events:
-        ApiEvent:
-          Type: HttpApi
-          Properties:
-            Path: /generate-questions
-            Method: POST
-            ApiId: MyHttpApi
-  MyHttpApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      CorsConfiguration:
-        AllowMethods:
-          - GET
-          - POST
-          - OPTIONS
-        AllowHeaders:
-          - Content-Type
-          - Authorization
-        AllowOrigins:
-          - http://localhost:5173
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: RESPONSE_STREAM

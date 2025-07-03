@@ -138,3 +138,5 @@ infrastructure/terraform.tfstate.backup
 *.tfstate.*
 *.backup
 env.json
+
+.aws-sam/

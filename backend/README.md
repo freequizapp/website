@@ -2,17 +2,18 @@
 ### Build the container using SAM
 `sam build`
 
-### Run it as a local http sever
-`sam local start-api --port 8080 --env-vars env.json`
-
-### Hit the api
+### We have to test after deployment, for streaming:
+`sam sync --watch \
+  --stack-name freequizapp \
+  --parameter-overrides GROQAPIKEY=<insert-api-key>\
+  --region us-west-2
 `
-curl -X POST http://localhost:8080/generate-questions \
+
+### test with command line request
+`curl -iN -X POST https://<insert-lambda-url> \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "rocket engines"}'
+  -d '{"prompt": "javascript"}'
 `
-
-Or use the frontend to prompt.
 
 ### For deployment we can use something like this
 `sam deploy --parameter-overrides GROQAPIKEY={github.secrets.groqapikey}`

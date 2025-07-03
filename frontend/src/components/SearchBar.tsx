@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import api_url from "../config/config";
 import type { Dispatch, SetStateAction } from "react";
 import type { Question } from "../types/Question";
 import { TextField, InputAdornment } from "@mui/material";
@@ -21,12 +22,10 @@ function SearchBar({ setIsLoading }: Props) {
   };
 
   const generateSearch = async () => {
-    console.log("search text: ", searchText);
-
     setCurrentQuiz([]);
     setIsLoading(true);
 
-    const res = await fetch("http://localhost:8080/generate-questions", {
+    const res = await fetch(api_url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,11 +41,7 @@ function SearchBar({ setIsLoading }: Props) {
     const decoder = new TextDecoder();
     let buffer = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
+    const processBuffer = () => {
       let newLineIndex;
       while ((newLineIndex = buffer.indexOf("\n")) !== -1) {
         const line = buffer.slice(0, newLineIndex).trim();
@@ -60,7 +55,18 @@ function SearchBar({ setIsLoading }: Props) {
           console.error("failed to parse streamed chunk: ", line);
         }
       }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      processBuffer();
     }
+
+    // final flush, incase last chunk had no trailing \n
+    buffer += decoder.decode();
+    processBuffer();
   };
 
   return (

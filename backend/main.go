@@ -4,15 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/joho/godotenv"
+	"github.com/aws/aws-lambda-go/lambdaurl"
 	"github.com/sirupsen/logrus"
 
 	"github.com/magicx-ai/groq-go/groq"
@@ -33,47 +29,44 @@ type Question struct {
 	Answers  []Answer `json:"answers"`
 }
 
-func handler(req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	origin := req.Headers["origin"]
-	logrus.Infof("origin: %s", origin)
+func handler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Content-Type", "application/json")
 
-	if origin == "" {
-		logrus.Info("origin empty...")
-		origin = req.Headers["origin"] // fallback if needed
-	}
-
-	actualPath := req.RequestContext.HTTP.Path
-	actualMethod := req.RequestContext.HTTP.Method
-	logrus.Infof("METHOD: %s | PATH: %s", actualMethod, actualPath)
-
-	if actualMethod == "OPTIONS" {
-		logrus.Infof("Handling preflight OPTIONS for path: %s", actualPath)
-		return corsResponse("", 200, origin), nil
-	}
-
-	if actualPath != "/generate-questions" || actualMethod != http.MethodPost {
-		logrus.Infof("path not matched: %s %s", actualMethod, actualPath)
-		return corsResponse(`{"error":"not found"}`, 404, origin), nil
-	}
-
-	if err := godotenv.Load(); err != nil {
-		logrus.WithError(err).Error("no .env file found -- continuing...")
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	var reqBody generateQuestionsReq
-	if err := json.Unmarshal([]byte(req.Body), &reqBody); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		logrus.WithError(err).Error("failed to parse request body")
-		return corsResponse(`{"error":"invalid request body"}`, 400, origin), nil
+		http.Error(w, `{"error": "invalid request body"}`, http.StatusBadRequest)
+		return
+
 	}
 
 	apiKey := os.Getenv("GROQAPIKEY")
 	if apiKey == "" {
 		logrus.Error("missing GROQAPIKEY")
-		return corsResponse(`{"error":"internal error"}`, 500, origin), nil
+		http.Error(w, `{"error": "missing credentials"}`, http.StatusInternalServerError)
+		return
 	}
 
 	httpClient := &http.Client{Timeout: 20 * time.Second}
 	client := groq.NewClient(apiKey, httpClient)
+
+	// warm up stream
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		logrus.Warn("Flusher not supported on ResponseWriter")
+	} else {
+		w.Write([]byte(`{"status": "stream started"}` + "\n"))
+		flusher.Flush()
+	}
 
 	prompt := fmt.Sprintf(`
 		Generate 5 multiple-choice questions about %s.
@@ -104,10 +97,11 @@ func handler(req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPRespons
 	})
 	if err != nil {
 		logrus.WithError(err).Error("could not connect to Groq")
-		return corsResponse(`{"error":"AI error"}`, 500, origin), nil
+		http.Error(w, `{"error": "could not connect"}`, http.StatusInternalServerError)
+		return
 	}
 
-	var buffer, response string
+	var partial string
 
 	for chunk := range stream {
 		if chunk.Error != nil {
@@ -120,46 +114,23 @@ func handler(req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPRespons
 			continue
 		}
 
-		buffer += data
-		decoder := json.NewDecoder(strings.NewReader(buffer))
+		partial += data
 
-		for decoder.More() {
-			var q Question
-			if err := decoder.Decode(&q); err != nil {
-				break
+		var q Question
+		if err := json.Unmarshal([]byte(partial), &q); err == nil {
+			chunkBytes, _ := json.Marshal(q)
+			w.Write(chunkBytes)
+			w.Write([]byte("\n"))
+			if flusher != nil {
+				w.(http.Flusher).Flush()
+				logrus.Infof("Decoded and streamed one question")
 			}
 
-			fmt.Println("---complete question---")
-			pretty, _ := json.MarshalIndent(q, "", "  ")
-			fmt.Println(string(pretty))
-
-			chunkBytes, _ := json.Marshal(q)
-			response += string(chunkBytes) + "\n"
-
-			rest := decoder.Buffered()
-			remaining, _ := io.ReadAll(rest)
-			buffer = string(remaining)
+			partial = ""
 		}
-	}
-
-	return corsResponse(response, 200, origin), nil
-}
-
-func corsResponse(body string, statusCode int, origin string) events.APIGatewayV2HTTPResponse {
-	headers := map[string]string{
-		"Access-Control-Allow-Methods":     "GET,POST,OPTIONS",
-		"Access-Control-Allow-Headers":     "Content-Type, Authorization",
-		"Access-Control-Allow-Credentials": "true",
-		"Access-Control-Allow-Origin":      "http://localhost:5173",
-	}
-
-	return events.APIGatewayV2HTTPResponse{
-		StatusCode: statusCode,
-		Body:       body,
-		Headers:    headers,
 	}
 }
 
 func main() {
-	lambda.Start(handler)
+	lambdaurl.Start(http.HandlerFunc(handler))
 }
