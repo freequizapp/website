@@ -10,7 +10,7 @@ jobs:
 
     env:
       AWS_REGION: us-west-2  # update if needed
-      STACK_NAME: your-sam-stack-name
+      STACK_NAME: freequizapp
 
     steps:
       - name: Checkout code
