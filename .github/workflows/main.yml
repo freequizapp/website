@@ -48,5 +48,6 @@ jobs:
             --s3-bucket ${{ env.S3_BUCKET }} \
             --capabilities CAPABILITY_IAM \
             --region ${{ env.AWS_REGION }} \
+            --parameter-overrides GROQAPIKEY=${{ secrets.GROQAPIKEY }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
