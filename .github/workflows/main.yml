@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: us-west-2  # update if needed
+      AWS_REGION: us-west-1  # update if needed
       STACK_NAME: freequizapp
       S3_BUCKET: acme-goapp-prod-samdeploy-us-west-2
 
