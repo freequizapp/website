@@ -11,7 +11,7 @@ jobs:
     env:
       AWS_REGION: us-west-1  # update if needed
       STACK_NAME: freequizapp
-      S3_BUCKET: acme-freequizapp-prod-samdeploy-us-west-1
+      S3_BUCKET: freequizapp-prod-samdeploy-us-west-1
 
     steps:
       - name: Checkout code
