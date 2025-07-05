@@ -42,7 +42,7 @@ jobs:
       - name: Deploy SAM app
         working-directory: backend
         run: |
-          sam deploy \
+          sam deploy --guided \
             --stack-name ${{ env.STACK_NAME }} \
             --capabilities CAPABILITY_IAM \
             --region ${{ env.AWS_REGION }} \
