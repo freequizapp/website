@@ -13,7 +13,6 @@ Resources:
   GenerateQuestionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: freequizapp-staging
       Handler: bootstrap
       CodeUri: .
       Runtime: provided.al2
