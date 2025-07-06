@@ -36,10 +36,12 @@ jobs:
         working-directory: .
         run: |
           sam deploy \
-            --stack-name ${{ env.STACK_NAME }} \
+            --stack-name freequizapp-${{ github.ref_name }} \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --capabilities CAPABILITY_IAM \
             --region ${{ env.AWS_REGION }} \
-            --parameter-overrides GROQAPIKEY=${{ secrets.GROQAPIKEY }} \
+            --parameter-overrides \
+              GROQAPIKEY=${{ secrets.GROQAPIKEY }} \
+              BranchName=${{ github.ref_name }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
