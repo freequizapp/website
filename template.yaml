@@ -13,6 +13,7 @@ Resources:
   GenerateQuestionsFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub freequizapp-${BranchName}
       Handler: bootstrap
       CodeUri: .
       Runtime: provided.al2
