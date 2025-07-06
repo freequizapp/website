@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Quiz AI Lambda
 Parameters:
+  BranchName:
+    Type: String
+    Description: "Git branch name for environment-based function naming"
   GROQAPIKEY:
     Type: String
     Description: "API key for GROQ"
