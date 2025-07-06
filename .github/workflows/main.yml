@@ -1,7 +1,7 @@
 name: Backend CI/CD (Go + SAM)
 on:
   push:
-    branches: [main] # same branch connected in Amplify for frontend
+    branches: [staging] # same branch connected in Amplify for frontend
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
