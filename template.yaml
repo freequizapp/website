@@ -26,3 +26,10 @@ Resources:
       FunctionUrlConfig:
         AuthType: NONE
         InvokeMode: RESPONSE_STREAM
+  AllowBrowserInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GenerateQuestionsFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
