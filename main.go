@@ -38,6 +38,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodOptions {
 		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	var reqBody generateQuestionsReq
