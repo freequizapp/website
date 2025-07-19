@@ -117,11 +117,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	responseText := chat.Choices[0].Message.Content
 
-	if err := json.Unmarshal([]byte(responseText), &questions); err == nil {
+	if err := json.Unmarshal([]byte(responseText), &questions); err != nil {
 		logrus.WithError(err).Error("failed to unmarshal groq response")
 		logrus.Infof("Groq response: %s", responseText)
 		http.Error(w, `{"error": "bad response format"}`, http.StatusInternalServerError)
 		return
+	}
+
+	if err := json.NewEncoder(w).Encode(questions); err != nil {
+		logrus.WithError(err).Error("failed to write response")
+		http.Error(w, `{"error": "failed to encode response"}`, http.StatusInternalServerError)
 	}
 }
 
