@@ -135,7 +135,7 @@ func retryChatRequest(client groq.Client, req groq.ChatCompletionRequest, maxRet
 
 		lastErr = err
 		wait := time.Duration(1<<i) * time.Second // exponential backoff
-		logrus.WithError(err).Warnf("retrying groq request (attempt %s)", i+1)
+		logrus.WithError(err).Warnf("retrying groq request (attempt %d)", i+1)
 		time.Sleep(wait)
 	}
 
