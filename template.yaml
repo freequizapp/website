@@ -5,6 +5,7 @@ Parameters:
   BranchName:
     Type: String
     Description: "Git branch name for environment-based function naming"
+    Default: main
   GROQAPIKEY:
     Type: String
     Description: "API key for GROQ"

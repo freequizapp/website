@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -60,76 +59,87 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	httpClient := &http.Client{Timeout: 20 * time.Second}
 	client := groq.NewClient(apiKey, httpClient)
 
-	// warm up stream
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		logrus.Warn("Flusher not supported on ResponseWriter")
-	} else {
-		w.Write([]byte(`{"status": "stream started"}` + "\n"))
-		flusher.Flush()
-	}
-
 	prompt := fmt.Sprintf(`
 		Generate 5 multiple-choice questions about %s.
 		Each question needs 4 answers.
-		Each question should be a separate JSON object:
-		{
-		  "question": "string",
-		  "answers": [
-			{ "text": "string", "correct": true/false, "reason": "string" }
-		  ]
-		}
-
-		Do NOT return a list or array.
-		DO NOT include commas between objects.
+		Format your response in JSON, with this exact format:
+		[
+			{
+			  "question": "string",
+			  "answers": [
+				{ "text": "string", "correct": true/false, "reason": "string" }
+			  ]
+			},
+			{
+			  "question": "string",
+			  "answers": [
+				{ "text": "string", "correct": true/false, "reason": "string" }
+			  ]
+			},
+			{
+			  "question": "string",
+			  "answers": [
+				{ "text": "string", "correct": true/false, "reason": "string" }
+			  ]
+			},
+			{
+			  "question": "string",
+			  "answers": [
+				{ "text": "string", "correct": true/false, "reason": "string" }
+			  ]
+			},
+			{
+			  "question": "string",
+			  "answers": [
+				{ "text": "string", "correct": true/false, "reason": "string" }
+			  ]
+			}
+		]
 		DO NOT wrap the output in square brackets.
 		DO NOT use Markdown or code fences.
-
-		Just return 5 separate JSON objects, one after another.
+		Just return 5 questions in this JSON format.
 	`, reqBody.Prompt)
 
-	stream, _, err := client.CreateChatCompletionStream(context.Background(), groq.ChatCompletionRequest{
-		Model:  "meta-llama/llama-4-scout-17b-16e-instruct",
-		Stream: true,
+	chat, err := retryChatRequest(client, groq.ChatCompletionRequest{
+		Model: "meta-llama/llama-4-scout-17b-16e-instruct",
 		Messages: []groq.Message{{
 			Role:    groq.MessageRoleUser,
 			Content: prompt,
 		}},
-	})
+	}, 3)
 	if err != nil {
 		logrus.WithError(err).Error("could not connect to Groq")
 		http.Error(w, `{"error": "could not connect"}`, http.StatusInternalServerError)
 		return
 	}
 
-	var partial string
+	var questions []Question
 
-	for chunk := range stream {
-		if chunk.Error != nil {
-			logrus.WithError(chunk.Error).Error("stream error")
-			break
-		}
+	responseText := chat.Choices[0].Message.Content
 
-		data := chunk.Response.Choices[0].Delta.Content
-		if data == "" {
-			continue
-		}
-
-		partial += data
-
-		var q Question
-		if err := json.Unmarshal([]byte(partial), &q); err == nil {
-			chunkBytes, _ := json.Marshal(q)
-			w.Write(chunkBytes)
-			w.Write([]byte("\n"))
-			if flusher != nil {
-				w.(http.Flusher).Flush()
-				logrus.Infof("Decoded and streamed one question")
-			}
-
-			partial = ""
-		}
+	if err := json.Unmarshal([]byte(responseText), &questions); err == nil {
+		logrus.WithError(err).Error("failed to unmarshal groq response")
+		logrus.Infof("Groq response: %s", responseText)
+		http.Error(w, `{"error": "bad response format"}`, http.StatusInternalServerError)
+		return
 	}
+}
+
+func retryChatRequest(client groq.Client, req groq.ChatCompletionRequest, maxRetries int) (*groq.ChatCompletionResponse, error) {
+	var lastErr error
+	for i := 0; i < maxRetries; i++ {
+		chat, err := client.CreateChatCompletion(req)
+		if err == nil {
+			return chat, nil
+		}
+
+		lastErr = err
+		wait := time.Duration(1<<i) * time.Second // exponential backoff
+		logrus.WithError(err).Warnf("retrying groq request (attempt %s)", i+1)
+		time.Sleep(wait)
+	}
+
+	return nil, lastErr
 }
 
 func main() {
