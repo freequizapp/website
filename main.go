@@ -114,48 +114,51 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		Just return one valid JSON array in this format.
 	`, reqBody.Prompt)
 
-	chat, err := retryChatRequest(client, groq.ChatCompletionRequest{
+	questions, err := retryChatRequest(client, groq.ChatCompletionRequest{
 		Model: "meta-llama/llama-4-scout-17b-16e-instruct",
 		Messages: []groq.Message{{
 			Role:    groq.MessageRoleUser,
 			Content: prompt,
 		}},
 	}, 3)
+
 	if err != nil {
 		logrus.WithError(err).Error("could not connect to Groq")
 		http.Error(w, `{"error": "could not connect"}`, http.StatusInternalServerError)
 		return
 	}
 
-	var questions []Question
-
-	responseText := chat.Choices[0].Message.Content
-
-	if err := json.Unmarshal([]byte(responseText), &questions); err != nil {
-		logrus.WithError(err).Error("failed to unmarshal groq response")
-		logrus.Infof("Groq response: %s", responseText)
-		http.Error(w, `{"error": "bad response format"}`, http.StatusInternalServerError)
-		return
-	}
-
+	// final response to client if max retries are reached
 	if err := json.NewEncoder(w).Encode(questions); err != nil {
 		logrus.WithError(err).Error("failed to write response")
 		http.Error(w, `{"error": "failed to encode response"}`, http.StatusInternalServerError)
 	}
 }
 
-func retryChatRequest(client groq.Client, req groq.ChatCompletionRequest, maxRetries int) (*groq.ChatCompletionResponse, error) {
+func retryChatRequest(client groq.Client, req groq.ChatCompletionRequest, maxRetries int) ([]Question, error) {
 	var lastErr error
 	for i := 0; i < maxRetries; i++ {
 		chat, err := client.CreateChatCompletion(req)
-		if err == nil {
-			return chat, nil
+		if err != nil {
+			lastErr = err
+			logrus.WithError(err).Warnf("retrying groq request (attempt %d)", i+1)
+			wait := time.Duration(1<<i) * time.Second // exponential backoff
+			time.Sleep(wait)
 		}
 
-		lastErr = err
-		wait := time.Duration(1<<i) * time.Second // exponential backoff
-		logrus.WithError(err).Warnf("retrying groq request (attempt %d)", i+1)
-		time.Sleep(wait)
+		responseText := chat.Choices[0].Message.Content
+		var questions []Question
+
+		if err := json.Unmarshal([]byte(responseText), &questions); err != nil {
+			lastErr = fmt.Errorf("unmarshal error %d", err)
+			logrus.WithError(err).Error("retrying groq request (attempt %w - bad JSON), ", i+1)
+			logrus.Infof("groq response: %s", responseText)
+			time.Sleep(time.Duration(1<<i) * time.Second)
+			continue
+		}
+
+		return questions, nil
+
 	}
 
 	return nil, lastErr
