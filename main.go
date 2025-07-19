@@ -61,43 +61,57 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	prompt := fmt.Sprintf(`
 		Generate 5 multiple-choice questions about %s.
-		Each question needs 4 answers.
-		Format your response in JSON, with this exact format:
-		[
-			{
-			  "question": "string",
-			  "answers": [
-				{ "text": "string", "correct": true/false, "reason": "string" }
-			  ]
-			},
-			{
-			  "question": "string",
-			  "answers": [
-				{ "text": "string", "correct": true/false, "reason": "string" }
-			  ]
-			},
-			{
-			  "question": "string",
-			  "answers": [
-				{ "text": "string", "correct": true/false, "reason": "string" }
-			  ]
-			},
-			{
-			  "question": "string",
-			  "answers": [
-				{ "text": "string", "correct": true/false, "reason": "string" }
-			  ]
-			},
-			{
-			  "question": "string",
-			  "answers": [
-				{ "text": "string", "correct": true/false, "reason": "string" }
-			  ]
-			}
-		]
-		DO NOT wrap the output in square brackets.
-		DO NOT use Markdown or code fences.
-		Just return 5 questions in this JSON format.
+		Each question needs 4 answers, one of which is correct.
+		Format your response in JSON as an array of objects, like this:
+	[
+	  {
+	    "question": "string",
+	    "answers": [
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" }
+	    ]
+	  },
+	  {
+	    "question": "string",
+	    "answers": [
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" }
+	    ]
+	  },
+	  {
+	    "question": "string",
+	    "answers": [
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" }
+	    ]
+	  },
+	  {
+	    "question": "string",
+	    "answers": [
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" }
+	    ]
+	  },
+	  {
+	    "question": "string",
+	    "answers": [
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" },
+	      { "text": "string", "correct": true/false, "reason": "string" }
+	    ]
+	  }
+	]
+		DO NOT use Markdown or code blocks.
+		Just return one valid JSON array in this format.
 	`, reqBody.Prompt)
 
 	chat, err := retryChatRequest(client, groq.ChatCompletionRequest{
